@@ -1,11 +1,9 @@
 import pandas as pd
 import tkinter as tk
 from tkinter.filedialog import askopenfilename
-from openpyxl import load_workbook
 import numpy as np
 from tkinter import *
 import tkinter.filedialog as fd
-import random
 import re
 import xlsxwriter
 import os
@@ -13,7 +11,7 @@ import datetime
 
 def getmonth(filenameforoutput):
     a = filenameforoutput.lower()
-    print(a)
+    # print(a)
     months = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"]
     if any(month in a for month in months):
         results = re.findall(r'_[a-z]{3}_', a)  #find month
@@ -26,30 +24,30 @@ def getmonth(filenameforoutput):
             results = results[1].strip("_")
             datetime_object = datetime.datetime.strptime(results, "%b")
             month_number = datetime_object.month
-            print("Ensure month abbreviation is given e.g. _Jan_ and no other underscore+3 characters+underscore combination is in filename")
+            print("Error: Ensure month abbreviation is given e.g. _Jan_ and no other underscore+3 characters+underscore combination is in filename")
         return month_number
     else:
-        print("month info is not found in filename")
+        print("Error: month info is not found in filename")
 
 def gethour(filenameforoutput):
     a = filenameforoutput.lower()
-    print(a)
+    # print(a)
 
     if "hr" in a:
         a = a.partition('hr')[1] + a.partition('hr')[2]
-        print(a)
+        # print(a)
         results = re.findall(r'hr_[0-9]{1,2}', a)       #accepts 1 or 2 digit
         hourdigit = ""
         for c in results[0]:            #re.findall returns a list
             if c.isdigit():
                 hourdigit = hourdigit + c
-        print(hourdigit)
+        # print(hourdigit)
         return hourdigit
     else:
-        print("Hour info is not found in filename")
+        print("Error: Hour info is not found in filename")
 
 def getweather(df_imported, numberofspeed):
-    print(df_imported.iat[0,0])
+    # print(df_imported.iat[0,0])
     T = [df_imported.iat[1+numberofspeed, 4]]
     T = T[0].partition(':')[2].strip()
 
@@ -87,7 +85,7 @@ def searchpollutant(df, target_pollutants, length, df_result, df_toexport, colna
     global first_merge_starting
     df.reset_index()
     row_list = df.loc[df['Speed'].isin(target_pollutants)].index.values     #both swtarting and running still using SPEED as colname
-    print(row_list)
+    # print(row_list)
     for i in row_list:  #loop through each pollutant row range
 
         if colname == 'Speed':
@@ -96,7 +94,7 @@ def searchpollutant(df, target_pollutants, length, df_result, df_toexport, colna
         elif colname == 'Time':
             df_temp = df.iloc[i-endrow-7: (i-endrow-7+3+length)]
             pol_colname = df_temp.loc[:, 'Speed'].iat[0].split(": ")[1]
-            print(df_temp)
+            # print(df_temp)
 
 
         # #swapping column names
@@ -109,22 +107,22 @@ def searchpollutant(df, target_pollutants, length, df_result, df_toexport, colna
         if colname == 'Speed':
             if first_merge: #
                 df_result = df_result.merge(df2, how = 'right', on = colname)
-                print("FIRST_MERGE",first_merge)
+                # print("FIRST_MERGE",first_merge)
 
             else:
                 df3 = df2[2:]
                 df_result = df_result.merge(df3, how = 'left', on = colname)
-                print("FIRST_MERGE",first_merge)
+                # print("FIRST_MERGE",first_merge)
 
         else:
             if first_merge_starting: #
                 df_result = df_result.merge(df2, how = 'right', on = colname)
-                print("FIRST_MERGE",first_merge)
+                # print("FIRST_MERGE",first_merge)
 
             else:
                 df3 = df2[2:]
                 df_result = df_result.merge(df3, how = 'left', on = colname)
-                print("FIRST_MERGE",first_merge)
+                # print("FIRST_MERGE",first_merge)
 
 
     if colname == 'Speed':
@@ -136,7 +134,7 @@ def searchpollutant(df, target_pollutants, length, df_result, df_toexport, colna
     df_result.insert(0, 'Temperature', T)    #insert Temp
     df_result.insert(0, 'Hour', hour)    #insert hour
     df_result.insert(0, 'Month', month)    #insert month
-    print(df_result)
+    # print(df_result)
 
     #export
     return pd.concat([df_toexport, df_result])
@@ -147,7 +145,7 @@ def exportfunc(df_result, df_result_ws2):
         try:
             os.remove("output.xlsx")
         except:
-            print("File not existing, OK to proceed")
+            print("output.xlsx File not existing, OK to proceed without removing file")
 
         #write first DF to first WS
         df_export = pd.DataFrame(data=df_result)
@@ -199,83 +197,85 @@ def exportfunc(df_result, df_result_ws2):
     else:
         pass
 
+if __name__ == "__main__":
+    root = tk.Tk()
+    root.withdraw()
+    filesopened = fd.askopenfilenames(parent=root, title='Choose the files')
+    root.destroy()
 
-root = tk.Tk()
-root.withdraw()
-filesopened = fd.askopenfilenames(parent=root, title='Choose the files')
-root.destroy()
+    print("files imported:", filesopened)
 
-print(filesopened)
+    target_columns = ["Speed", "PC.4", "TAXI.4", "LGV3.4", "LGV4.4", "LGV6.4", "HGV7.4", "HGV8.4",
+                      "PLB.4", "PV4.4", "PV5.4",  "NFB6.4","NFB7.4", "NFB8.4",  "FBSD.4", "FBDD.4",
+                      "MC.4","HGV9.4","NFB9.4"]     # "ALL", "ALL.1", "ALL.2", "ALL.3", "ALL.4"
 
-target_columns = ["Speed", "PC.4", "TAXI.4", "LGV3.4", "LGV4.4", "LGV6.4", "HGV7.4", "HGV8.4",
-                  "PLB.4", "PV4.4", "PV5.4",  "NFB6.4","NFB7.4", "NFB8.4",  "FBSD.4", "FBDD.4",
-                  "MC.4","HGV9.4","NFB9.4"]     # "ALL", "ALL.1", "ALL.2", "ALL.3", "ALL.4"
+    target_pollutants = ["Pollutant Name: Oxides of Nitrogen", "Pollutant Name: PM30", "Pollutant Name: PM10",
+                         "Pollutant Name: PM2.5", "Pollutant Name: Nitrogen Dioxide"]
 
-target_pollutants = ["Pollutant Name: Oxides of Nitrogen", "Pollutant Name: PM30", "Pollutant Name: PM10",
-                     "Pollutant Name: PM2.5", "Pollutant Name: Nitrogen Dioxide"]
-
-sep = "*****************************************************************************************"
+    sep = "*****************************************************************************************"
 
 
 
-df_toexport = pd.DataFrame()
-df_toexport2 = pd.DataFrame()
-first = True
-first_merge = True
-first_merge_starting = True
-for filesname in filesopened:
+    df_toexport = pd.DataFrame()
+    df_toexport2 = pd.DataFrame()
+    first = True
+    first_merge = True
+    first_merge_starting = True
+    for filesname in filesopened:
 
-    # with open(filesname) as file:
-    #     lines = file.readlines()
-    #     lines = [line.rstrip() for line in lines]
+        # with open(filesname) as file:
+        #     lines = file.readlines()
+        #     lines = [line.rstrip() for line in lines]
 
-    # print(lines)
-    filenameforoutput = filesname.rsplit("/",1)[1]
+        # print(lines)
+        filenameforoutput = filesname.rsplit("/",1)[1]
 
-    # print(filesname)
-    print(filenameforoutput)
+        # print(filesname)
+        print(filenameforoutput, "extracting...")
 
-    month = getmonth(filenameforoutput)
-    # print(type(month))
-    hour = gethour(filenameforoutput)
-    # print(type(hour))
+        month = getmonth(filenameforoutput)
+        # print(type(month))
+        hour = gethour(filenameforoutput)
+        # print(type(hour))
 
-    df = pd.read_csv(filesname, sep=',',  skiprows = 16)    #import raw output file
-    df_import = df.copy()
+        df = pd.read_csv(filesname, sep=',',  skiprows = 16)    #import raw output file
+        df_import = df.copy()
 
-    df = df[target_columns]                                 #go to interested columns only
+        df = df[target_columns]                                 #go to interested columns only
 
-    #slice df to running only
-    endrow = df[df['Speed'] == sep ].index[0]
-    print(endrow)
+        #slice df to running only
+        endrow = df[df['Speed'] == sep ].index[0]
+        # print(endrow)
 
-    starting_endrow = df[df['Speed'] == sep ].index[1]
-    print(starting_endrow)
-    df_running = df[:(endrow-6)]                                    #running only
-    # print(df_running)
-    df_starting = df[(endrow+7):(starting_endrow-6)]               #starting only
-    print("STARTING", df_starting)
+        starting_endrow = df[df['Speed'] == sep ].index[1]
+        # print(starting_endrow)
+        df_running = df[:(endrow-6)]                                    #running only
+        # print(df_running)
+        df_starting = df[(endrow+7):(starting_endrow-6)]               #starting only
+        # print("STARTING", df_starting)
 
-    ### #count unique speeds in running
-    numberofspeed = get_numberofspeed(df_running)
+        ### #count unique speeds in running
+        numberofspeed = get_numberofspeed(df_running)
 
-    #count unique timese in starting
-    numberoftime = get_numberoftime(df_starting)
+        #count unique timese in starting
+        numberoftime = get_numberoftime(df_starting)
 
-    T = getweather(df_import, numberofspeed)[0]
-    RH = getweather(df_import, numberofspeed)[1]
-    # print(T, RH)
+        T = getweather(df_import, numberofspeed)[0]
+        RH = getweather(df_import, numberofspeed)[1]
+        # print(T, RH)
 
-    df_result = create_constantdf(df_running, 'Speed', numberofspeed)
+        df_result = create_constantdf(df_running, 'Speed', numberofspeed)
 
-    #create constant for starting data
-    df_result_ws2 = create_constantdf(df_starting, 'Time', numberoftime)
-    # print(df_result_ws2)
+        #create constant for starting data
+        df_result_ws2 = create_constantdf(df_starting, 'Time', numberoftime)
+        # print(df_result_ws2)
 
-    df_toexport = searchpollutant(df_running, target_pollutants, numberofspeed, df_result, df_toexport, 'Speed')
+        df_toexport = searchpollutant(df_running, target_pollutants, numberofspeed, df_result, df_toexport, 'Speed')
 
-    df_toexport2 = searchpollutant(df_starting, target_pollutants, numberoftime, df_result_ws2, df_toexport2, 'Time')
-    df_toexport2 = df_toexport2.drop_duplicates()
+        df_toexport2 = searchpollutant(df_starting, target_pollutants, numberoftime, df_result_ws2, df_toexport2, 'Time')
+        df_toexport2 = df_toexport2.drop_duplicates()
 
-#export to excel
-exportfunc(df_toexport, df_toexport2)
+
+    #export to excel
+    exportfunc(df_toexport, df_toexport2)
+    print("ALL files successfully extracted and exported to output.xlsx")

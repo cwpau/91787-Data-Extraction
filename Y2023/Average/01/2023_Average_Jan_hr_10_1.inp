@@ -1,0 +1,24 @@
+EmfacHK43-Header
+    Version 4 3 0 0             
+    Scenario-Count 1
+    HK-IM Y 0 0 2020 0 0 2020 0 0 2020 0 0 2020 0 0 2020 0 0 2020 0 0 2020 0 0 2020 0 0 2020 0 0 2020 0 0 2020 0 0 2020 0 0 2020 0 0 2020 0 0 2020
+    HKUNITS Y
+End-Header
+Begin-Scenario 1
+    Title 2023_Average_Jan_hr_10_1
+    Program-Mode Emfac
+    Area-Method One-County
+    Area-Type SAR
+    Area-Number 38 [Hong Kong SAR]
+    HC-Mode VOC
+    PM-Mode PM10
+    CYr 2023
+    BYr -1
+    MYr All
+    Vehicles PC TAXI LGV3 LGV4 LGV6 HGV7 HGV8 PLB PV4 PV5 NFB6 NFB7 NFB8 FBSD FBDD MC HGV9 NFB9
+    Season Annual
+    Emfac-Reports RTL
+    Emfac-Speed 15. 16. 17. 18. 19. 20. 21. 22. 23. 24. 25. 26. 27. 28. 29. 30. 31. 32. 33. 34. 35. 36. 37. 38.
+    Emfac-RH 68.
+    Emfac-Temp 19.
+End-Scenario
